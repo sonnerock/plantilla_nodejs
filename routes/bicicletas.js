@@ -18,20 +18,20 @@ router.get("/", async (req, res) => {
     } catch (error) {
         console.error(error)
         res.status(500).json({
-            status:500,
+            status: 500,
             message: "Error interno de servidor"
         })
     }
 })
 
-router.post("/", async (req, res) =>{
+router.post("/", async (req, res) => {
     const { marca, modelo, precio } = req.body
-    
-    if(marca && modelo && precio){
+
+    if (marca && modelo && precio) {
         //La solicitud correcta
         try {
             const text = "INSERT INTO bicicletas (id, marca, modelo, precio) VALUES ($1, $2, $3, $4) RETURNING*"
-            const values = [uuidv4().slice(0,6), marca, modelo, Number(precio)]
+            const values = [uuidv4().slice(0, 6), marca, modelo, Number(precio)]
 
             const result = await db.query(text, values)
 
@@ -44,12 +44,12 @@ router.post("/", async (req, res) =>{
             console.error(error)
 
             res.status(500).json({
-                status:500,
+                status: 500,
                 message: "Error interno de servidor"
             })
-            
+
         }
-    }else{
+    } else {
         //bad request
         res.status(400).json({
             message: "bad request",
@@ -58,10 +58,10 @@ router.post("/", async (req, res) =>{
     }
 })
 
-router.put("/", async (req, res) =>{
+router.put("/", async (req, res) => {
     const { id, marca, modelo, precio } = req.body
 
-    if( id && marca && modelo && precio ) {
+    if (id && marca && modelo && precio) {
         try {
             const text = "UPDATE bicicletas SET marca = $2, modelo = $3, precio = $4 WHERE id = $1 RETURNING *"
             const values = [id, marca, modelo, precio]
@@ -74,9 +74,9 @@ router.put("/", async (req, res) =>{
             })
         } catch (error) {
             console.error(error)
-            
+
             res.status(500).json({
-                status:500,
+                status: 500,
                 message: "Error interno de servidor"
             })
         }
@@ -88,4 +88,36 @@ router.put("/", async (req, res) =>{
         })
     }
 })
+
+router.delete("/", async (req, res) => {
+    const { id } = req.query
+    if (id) {
+        try {
+            const text = "DELETE FROM bicicletas WHERE id = $1"
+            const values = [id]
+
+            const result = await db.query(text, values)
+
+            res.json({
+                message: "Bicicleta eliminada con exito",
+                status: 200
+            })
+        } catch (error) {
+            console.error(error)
+
+            res.status(500).json({
+                status: 500,
+                message: "Error interno de servidor"
+            })
+        }
+
+    } else {
+        res.status(400).json({
+            message: "bad request",
+            status: "400",
+            error: "Faltan parametros en el body"
+        })
+    }
+})
+
 export { router }
